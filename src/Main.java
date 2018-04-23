@@ -56,6 +56,8 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		Integer inputSize, attrSize;
 		List<Sample> sampleList = new ArrayList();
+		Integer totalComparisons = 0, hits = 0;
+		
 		Scanner sc = new Scanner(System.in);
 		try {
 			FileReader arq = new FileReader("dados.txt");
@@ -98,21 +100,19 @@ public class Main {
 							Collections.sort(sampleList);
 							for(int i = 0; i < sampleList.size(); i++){
 								sampleList.get(i).setFoldNumber(i%KFOLD);
-								sampleList.get(i).setRelationsByFold(new RelationsByFold[KFOLD-1]);
+								RelationsByFold [] relations = new RelationsByFold[KFOLD-1];
+								for(int j=0; j < KFOLD-1; j++){
+									relations[j] = new RelationsByFold();
+								}
+								sampleList.get(i).setRelationsByFold(relations);
 								int relationIndex = 0;
 								for(int j = 0; j < KFOLD; j++){
 									if(i%KFOLD != j){//setando o número dos folds de teste destino
-										sampleList.get(i).getRelationsByFold()[relationIndex].setTargetFold(i%KFOLD);
+										sampleList.get(i).getRelationsByFold()[relationIndex].setTargetFold(j);
+										relationIndex++;
 									}
 								}
 							}
-							/*for(int i = 0; i < KFOLD; i++){//fold de teste
-								for(Sample sample : sampleList){
-									if(sample.getFoldNumber() != sample.getFoldNumber()){
-										
-									}
-								}
-							}*/
 							for(Sample sample : sampleList){
 								for(Sample sample2 : sampleList){
 									if(sample.getFoldNumber() != sample2.getFoldNumber()){//fold diferente do teste por amostra
@@ -121,10 +121,38 @@ public class Main {
 										relationsByFold.getSampleRelationList().add(relation);
 									}
 								}
-								for(RelationsByFold relationsByFold : sample.getRelationsByFold()){
+								for(RelationsByFold relationsByFold : sample.getRelationsByFold()){//obter vizinhos mais próximos e "classe suposta"
+									Integer[] classBasket = new Integer[classes.size()];
+									for(int j=0; j<classBasket.length; j++){
+										classBasket[j] = 0;
+									}
 									Collections.sort(relationsByFold.getSampleRelationList()); //ordenar a lista de relações por distancia
+									for(int j=0; j < KNN; j++){//obter n-ésimo vizinho
+										System.out.print("[ ");
+										for(SampleRelation relation : relationsByFold.getSampleRelationList()){
+											System.out.print(" "+relation.getTarget().getClassNumber());
+										}
+										System.out.println("] ");
+										
+										System.out.print("[");
+										for(SampleRelation relation : relationsByFold.getSampleRelationList()){
+											System.out.print(" "+relation.getDistance());
+										}
+										System.out.println("] ");
+										
+										Integer neighborClass = relationsByFold.getSampleRelationList().get(j).getTarget().getClassNumber();
+										classBasket[classes.indexOf(neighborClass)]++;
+									}
+									//TODO tratar caso de duas classes
+									Integer supposedClassByFold  = classes.get(maxClassIndex(classBasket));
+									totalComparisons++;
+									System.out.println("SC: "+supposedClassByFold+" C:"+sample.getClassNumber() );
+									if(supposedClassByFold == sample.getClassNumber()){
+										hits++;
+									}
 								}
 							}
+							System.out.println("total: "+totalComparisons+"hits: "+hits);
 						}
 					}
 				} else {

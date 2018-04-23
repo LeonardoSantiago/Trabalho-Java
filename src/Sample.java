@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Sample implements Comparable {
 	private double attrs[];
 	private Integer classNumber;
-	private Integer supposedClassNumber;
+	//private Integer supposedClassNumber;
 	private Integer foldNumber; 
 	private RelationsByFold[] relationsByFold;
 	public Sample(double attrs [], int classNumber){
@@ -23,12 +23,12 @@ public class Sample implements Comparable {
 	public void setClassNumber(Integer classNumber) {
 		this.classNumber = classNumber;
 	}
-	public Integer getSupposedClassNumber() {
+	/*public Integer getSupposedClassNumber() {
 		return supposedClassNumber;
 	}
 	public void setSupposedClassNumber(Integer supposedClassNumber) {
 		this.supposedClassNumber = supposedClassNumber;
-	}
+	}*/
 	public Integer getFoldNumber() {
 		return foldNumber;
 	}
