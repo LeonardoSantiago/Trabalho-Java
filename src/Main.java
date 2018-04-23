@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.lang.Math;
 
 public class Main {
 	private static final int KNN = 5;
@@ -47,12 +48,52 @@ public class Main {
 		for(RelationsByFold relationsByFold : sample.getRelationsByFold()){
 			for(int i=0; i < KNN; i++){
 				int neighborClassNumber = relationsByFold.getSampleRelationList().get(i).getTarget().getClassNumber();
-				classBasket[classes.indexOf(neighborClassNumber)]++; //incrementando ocorrências
+				classBasket[classes.indexOf(neighborClassNumber)]++; //incrementando ocorrï¿½ncias
 			}
 		}
 		return null;
 	}
 	
+	public static double[] calculateAverage(List<Sample> samples, Integer size) {
+		double[] averages = new double[size];
+		for (int i = 0; i < averages.length; i++) {
+			double average = 0;
+			for(Sample s : samples) {
+				double[] attrs = s.getAttrs();
+				average = average + attrs[i];
+			}
+			average = average/samples.size();
+			averages[i] = average;
+		}
+		return averages;
+	}
+	
+	public static double calculateStandartDeviation(List<Sample> samples, Integer size) {
+		double[] averages = calculateAverage(samples, size);
+		double sum = 0;
+		for(Sample s : samples) {
+			double[] attrs = s.getAttrs();
+			sum = sum + Math.pow((attrs[position] - average),2);
+		}
+		double standartDeviation = Math.sqrt(sum/(samples.size()-1));
+		return standartDeviation;
+	}
+	
+	public static List<Sample> calculeZscoreOfAllAttrs(List<Sample> samples){
+		Integer size = samples.get(0).getAttrs().length;
+		double[] averages = calculateAverage(samples,size);
+		double standartDeviation = calculateStandartDeviation(samples,size);
+		
+		for(Sample s : samples) {
+			Integer size = s.getAttrs().length;
+			double[] attrs = new double[size];
+			for(int i = 0; i < s.getAttrs().length; i++) {
+				attrs[i] = (s.getAttrs()[i] - average)/standartDeviation;
+			}
+			s.setAttrs(attrs);
+		}
+		return samples;
+	}
 	public static void main(String[] args) throws Exception {
 		Integer inputSize, attrSize;
 		List<Sample> sampleList = new ArrayList();
@@ -94,6 +135,7 @@ public class Main {
 						opt = sc.nextInt(); 
 						if(opt == 1){
 							
+							
 						}else if(opt == 2){
 							Collections.sort(sampleList);
 							for(int i = 0; i < sampleList.size(); i++){
@@ -101,7 +143,7 @@ public class Main {
 								sampleList.get(i).setRelationsByFold(new RelationsByFold[KFOLD-1]);
 								int relationIndex = 0;
 								for(int j = 0; j < KFOLD; j++){
-									if(i%KFOLD != j){//setando o número dos folds de teste destino
+									if(i%KFOLD != j){//setando o nï¿½mero dos folds de teste destino
 										sampleList.get(i).getRelationsByFold()[relationIndex].setTargetFold(i%KFOLD);
 									}
 								}
@@ -122,7 +164,7 @@ public class Main {
 									}
 								}
 								for(RelationsByFold relationsByFold : sample.getRelationsByFold()){
-									Collections.sort(relationsByFold.getSampleRelationList()); //ordenar a lista de relações por distancia
+									Collections.sort(relationsByFold.getSampleRelationList()); //ordenar a lista de relaï¿½ï¿½es por distancia
 								}
 							}
 						}
